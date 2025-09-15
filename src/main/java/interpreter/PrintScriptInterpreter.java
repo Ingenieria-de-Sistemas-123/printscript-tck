@@ -3,6 +3,7 @@ package interpreter;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
+import org.printscript.interpreter.*;
 
 public interface PrintScriptInterpreter {
     /**
