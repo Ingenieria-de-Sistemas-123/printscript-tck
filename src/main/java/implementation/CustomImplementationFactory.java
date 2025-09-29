@@ -4,23 +4,29 @@ import interpreter.PrintScriptFormatter;
 import interpreter.PrintScriptInterpreter;
 import interpreter.PrintScriptLinter;
 
-import java.io.BufferedInputStream;
-import java.util.Arrays;
-
 public class CustomImplementationFactory implements PrintScriptFactory {
+    private final PrintScriptInterpreter interpreter;
+    private final PrintScriptFormatter formatter;
+    private final PrintScriptLinter linter;
+
+    public CustomImplementationFactory() {
+        this.interpreter = new InterpreterAdapter();
+        this.formatter = new FormatterAdapter();
+        this.linter = new LinterAdapter();
+    }
 
     @Override
     public PrintScriptInterpreter interpreter() {
-        return new PrintScriptInterpreterImpl();
+        return interpreter;
     }
 
     @Override
     public PrintScriptFormatter formatter() {
-        return new PrintScriptFormatterImpl();
+        return formatter;
     }
 
     @Override
     public PrintScriptLinter linter() {
-        return new PrintScriptLinterImpl();
+        return linter;
     }
 }
