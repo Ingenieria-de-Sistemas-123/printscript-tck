@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.printscript.linter.LintConfig;
+import org.printscript.linter.LintConfigLoader;
 import org.printscript.linter.Linter;
 import org.printscript.linter.issue.Issue;
 import org.printscript.linter.rules.IdentifierStyleRule;
@@ -19,6 +20,7 @@ import org.printscript.linter.rules.StringNumberConcatRule;
 import org.printscript.parser.node.ASTNode;
 
 final class LinterAdapter implements PrintScriptLinter {
+
     private static List<Rule> buildRules(LintConfig lintConfig) {
         List<Rule> rules = new ArrayList<>();
         rules.add(new PrintlnRestrictionRule());
@@ -37,7 +39,7 @@ final class LinterAdapter implements PrintScriptLinter {
         Objects.requireNonNull(version, "version");
         ErrorHandler safeHandler = AdapterUtils.safeHandler(handler);
 
-        String source;
+        final String source;
         try {
             source = ScriptSupport.readAll(src);
         } catch (IOException ex) {
@@ -45,7 +47,7 @@ final class LinterAdapter implements PrintScriptLinter {
             return;
         }
 
-        List<ASTNode> ast;
+        final List<ASTNode> ast;
         try {
             ast = ScriptSupport.parseAst(source, version);
         } catch (RuntimeException ex) {
@@ -53,7 +55,7 @@ final class LinterAdapter implements PrintScriptLinter {
             return;
         }
 
-        LintConfig lintConfig = LintConfigLoader.load(config);
+        LintConfig lintConfig = LintConfigLoader.INSTANCE.load(config);
         List<Rule> rules = buildRules(lintConfig);
         Linter linter = new Linter(rules, lintConfig);
         List<Issue> issues = linter.analyze(ast);
