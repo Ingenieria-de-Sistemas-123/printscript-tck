@@ -1,10 +1,8 @@
 package implementation;
 
 import interpreter.PrintScriptFormatter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.io.Writer;
+
+import java.io.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,14 +19,14 @@ final class FormatterAdapter implements PrintScriptFormatter {
 
         String source;
         try {
-            source = ScriptSupport.readAll(src);
+            source = ScriptSupport.readAll(src); // ahora devuelve String
         } catch (IOException ex) {
             throw new UncheckedIOException("Failed to read source", ex);
         }
 
         List<ASTNode> ast;
         try {
-            ast = ScriptSupport.parseAst(source, version);
+            ast = ScriptSupport.parseAst(source, version); // usa la sobrecarga String
         } catch (RuntimeException ex) {
             throw new IllegalStateException("Failed to parse script: " + AdapterUtils.messageOrDefault(ex), ex);
         }
