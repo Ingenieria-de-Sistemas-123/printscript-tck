@@ -1,6 +1,5 @@
 package interpreter;
 
-import org.printscript.interpreter.io.*;
 
 public class InputProviderAdapter implements InputProvider {
     private final InputProvider inputProvider;
