@@ -29,14 +29,15 @@ test {
 
 dependencies {
     testImplementation 'junit:junit:4.13.1'
-    implementation 'org.printscript:cli:1.1-SNAPSHOT'
+    implementation 'org.printscript:cli:1.2-SNAPSHOT'
     implementation 'org.printscript:common:1.1-SNAPSHOT'
-    implementation 'org.printscript:formatter:1.1-SNAPSHOT'
-    implementation 'org.printscript:interpreter:1.4-SNAPSHOT'
-    implementation 'org.printscript:lexer:1.1-SNAPSHOT'
-    implementation 'org.printscript:linter:1.1-SNAPSHOT'
-    implementation 'org.printscript:parser:1.1-SNAPSHOT'
-    implementation 'org.printscript:token:1.1-SNAPSHOT'
+    implementation 'org.printscript:formatter:1.4-SNAPSHOT'
+    implementation 'org.printscript:interpreter:2.1-SNAPSHOT'
+    implementation 'org.printscript:lexer:1.6-SNAPSHOT'
+    implementation 'org.printscript:linter:1.6-SNAPSHOT'
+    implementation 'org.printscript:parser:1.5-SNAPSHOT'
+    implementation 'org.printscript:token:1.2-SNAPSHOT'
+    implementation 'org.printscript:runner:1.6-SNAPSHOT'
 }
 
 test {
