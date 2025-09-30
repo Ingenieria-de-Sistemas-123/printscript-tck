@@ -4,24 +4,32 @@ import interpreter.ErrorHandler;
 import interpreter.PrintScriptLinter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import org.printscript.linter.LintConfig;
 import org.printscript.linter.Linter;
 import org.printscript.linter.issue.Issue;
+import org.printscript.linter.rules.IdentifierStyleRule;
 import org.printscript.linter.rules.NoDuplicateVariableRule;
 import org.printscript.linter.rules.PrintlnRestrictionRule;
+import org.printscript.linter.rules.ReadInputPromptRule;
 import org.printscript.linter.rules.Rule;
 import org.printscript.linter.rules.StringNumberConcatRule;
 import org.printscript.parser.node.ASTNode;
 
 final class LinterAdapter implements PrintScriptLinter {
-    private static final List<Rule> RULES = List.of(
-            new PrintlnRestrictionRule(),
-            new StringNumberConcatRule(),
-            new NoDuplicateVariableRule()
-    );
+    private static List<Rule> buildRules(LintConfig lintConfig) {
+        List<Rule> rules = new ArrayList<>();
+        rules.add(new PrintlnRestrictionRule());
+        rules.add(new StringNumberConcatRule());
+        rules.add(new NoDuplicateVariableRule());
+        rules.add(new ReadInputPromptRule());
+        if (lintConfig.getIdentifierStyle() != null) {
+            rules.add(new IdentifierStyleRule());
+        }
+        return rules;
+    }
 
     @Override
     public void lint(InputStream src, String version, InputStream config, ErrorHandler handler) {
@@ -46,7 +54,8 @@ final class LinterAdapter implements PrintScriptLinter {
         }
 
         LintConfig lintConfig = LintConfigLoader.load(config);
-        Linter linter = new Linter(RULES, lintConfig);
+        List<Rule> rules = buildRules(lintConfig);
+        Linter linter = new Linter(rules, lintConfig);
         List<Issue> issues = linter.analyze(ast);
         for (Issue issue : issues) {
             safeHandler.reportError(formatIssue(issue));
