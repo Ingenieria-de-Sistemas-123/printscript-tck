@@ -73,6 +73,6 @@ final class ScriptSupport {
     }
 
     static boolean isSyntaxException(Throwable throwable) {
-        return throwable instanceof ParseException || throwable instanceof LexicalException;
+        return !(throwable instanceof ParseException) && !(throwable instanceof LexicalException);
     }
 }

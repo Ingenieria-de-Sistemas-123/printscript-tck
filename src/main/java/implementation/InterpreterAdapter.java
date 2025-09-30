@@ -38,14 +38,14 @@ final class InterpreterAdapter implements PrintScriptInterpreter {
         if (isCollector) {
             // Modo que fuerza alto consumo de memoria para que el test con PrintCollector produzca OOM
             try (Reader reader = new InputStreamReader(src, StandardCharsets.UTF_8)) {
-                List<ASTNode> ast = ScriptSupport.parseAst(reader, version); // materializa todo
+                List<ASTNode> ast = ScriptSupport.parseAst(reader, version); // materializa all
                 interpreter.execute(ast, interpreterHandler);
             } catch (Throwable ex) { // incluye OutOfMemoryError
                 if (ex instanceof OutOfMemoryError && ex.getMessage() != null && ex.getMessage().contains("Java heap space")) {
                     safeHandler.reportError("Java heap space");
                 } else {
                     String message = AdapterUtils.messageOrDefault(ex);
-                    if (!ScriptSupport.isSyntaxException(ex)) {
+                    if (ScriptSupport.isSyntaxException(ex)) {
                         message = "Interpreter error: " + message;
                     }
                     safeHandler.reportError(message);
@@ -65,12 +65,12 @@ final class InterpreterAdapter implements PrintScriptInterpreter {
             }
         } catch (RuntimeException ex) {
             String message = AdapterUtils.messageOrDefault(ex);
-            if (!ScriptSupport.isSyntaxException(ex)) {
+            if (ScriptSupport.isSyntaxException(ex)) {
                 message = "Interpreter error: " + message;
             }
             safeHandler.reportError(message);
         } catch (Exception ex) {
-            safeHandler.reportError("Interpreter error: " + AdapterUtils.messageOrDefault(ex));
+            throw new RuntimeException(ex);
         }
     }
 
