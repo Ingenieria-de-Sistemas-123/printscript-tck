@@ -31,9 +31,9 @@ final class FormatterAdapter implements PrintScriptFormatter {
             throw new IllegalStateException("Failed to parse script: " + AdapterUtils.messageOrDefault(ex), ex);
         }
 
-        FormatterConfig formatterConfig = FormatterConfigLoader.load(config);
-        CodeFormatter formatter = new CodeFormatter();
-        String formatted = formatter.format(ast, formatterConfig);
+        final FormatterConfig formatterConfig = AdapterConfigNormalizer.loadNormalized(config);
+        final CodeFormatter formatter = new CodeFormatter();
+        final String formatted = formatter.format(ast, formatterConfig);
         try {
             writer.write(formatted);
             writer.flush();
