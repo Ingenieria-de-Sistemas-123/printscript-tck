@@ -5,40 +5,51 @@ import org.printscript.formatter.CodeFormatter;
 import org.printscript.formatter.config.FormatterConfig;
 import org.printscript.parser.node.ASTNode;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.util.List;
 import java.util.Objects;
 
-final class FormatterAdapter implements PrintScriptFormatter {
+/**
+ * Adapter para el TCK: parsea el código según la versión (soporta 1\.0 y 1\.1),
+ * carga configuración JSON y delega en CodeFormatter.
+ */
+public final class FormatterAdapter implements PrintScriptFormatter {
+
+    private final CodeFormatter formatter = new CodeFormatter();
+
     @Override
     public void format(InputStream src, String version, InputStream config, Writer writer) {
         Objects.requireNonNull(src, "src");
         Objects.requireNonNull(version, "version");
         Objects.requireNonNull(writer, "writer");
 
-        final String source;
         try {
-            source = ScriptSupport.readAll(src);
-        } catch (IOException ex) {
-            throw new UncheckedIOException("Failed to read source", ex);
-        }
+            // Leer fuente completa
+            String source = ScriptSupport.readAll(src);
 
-        FormatterConfig formatterConfig = FormatterConfigLoader.load(config);
+            // Parsear AST (lanza IllegalArgumentException si versión inválida)
+            List<ASTNode> ast = ScriptSupport.parseAst(source, version);
 
-        final String formatted;
-        try {
-            List<ASTNode> parsedSource = ScriptSupport.parseAst(source, version);
-            CodeFormatter codeFormatter = new CodeFormatter();
-            formatted = codeFormatter.format(parsedSource, formatterConfig);
-        } catch (RuntimeException ex) {
-            throw new IllegalStateException("Failed to format script: " + AdapterUtils.messageOrDefault(ex), ex);
-        }
+            // Cargar config (defaults si null o vacía)
+            FormatterConfig cfg = FormatterConfigLoader.load(config);
 
-        try {
-            writer.write(formatted);
+            // Formatear
+            String pretty = formatter.format(ast, cfg);
+
+            // Escribir (sin agregar newline extra; CodeFormatter ya trimea finales)
+            writer.write(pretty);
             writer.flush();
         } catch (IOException ex) {
-            throw new UncheckedIOException("Failed to write formatted output", ex);
+            throw new UncheckedIOException("Error leyendo fuente", ex);
+        } catch (RuntimeException ex) {
+            // Si es error léxico o sintáctico, lo propagamos claramente
+            if (ScriptSupport.isSyntaxException(ex)) {
+                throw new IllegalStateException("Error de sintaxis al formatear: " + ex.getMessage(), ex);
+            }
+            throw ex;
         }
     }
 }

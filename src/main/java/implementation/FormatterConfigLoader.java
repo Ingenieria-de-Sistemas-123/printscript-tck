@@ -11,8 +11,7 @@ import org.printscript.formatter.config.ConfigJsonReader;
 import org.printscript.formatter.config.FormatterConfig;
 
 final class FormatterConfigLoader {
-    private FormatterConfigLoader() {
-    }
+    private FormatterConfigLoader() {}
 
     static FormatterConfig load(InputStream config) {
         if (config == null) {
@@ -26,8 +25,7 @@ final class FormatterConfigLoader {
             Path tempFile = Files.createTempFile("printscript-formatter", ".json");
             try {
                 Files.writeString(tempFile, content, StandardCharsets.UTF_8);
-                ConfigJsonReader reader = new ConfigJsonReader();
-                return reader.readFromFile(tempFile.toString());
+                return new ConfigJsonReader().readFromFile(tempFile.toString());
             } finally {
                 Files.deleteIfExists(tempFile);
             }
