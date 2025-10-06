@@ -1,3 +1,4 @@
+// java
 package implementation;
 
 import interpreter.PrintScriptFormatter;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Adapter para el TCK: parsea el código según la versión (soporta 1\.0 y 1\.1),
+ * Adapter para el TCK: parsea el código según la versión (soporta 1.0 y 1.1),
  * carga configuración JSON y delega en CodeFormatter.
  */
 public final class FormatterAdapter implements PrintScriptFormatter {
@@ -36,16 +37,14 @@ public final class FormatterAdapter implements PrintScriptFormatter {
             // Cargar config (defaults si null o vacía)
             FormatterConfig cfg = FormatterConfigLoader.load(config);
 
-            // Formatear
-            String pretty = formatter.format(ast, cfg);
+            // Formatear con el source original para layout tracking
+            String pretty = formatter.format(ast, cfg, source);
 
-            // Escribir (sin agregar newline extra; CodeFormatter ya trimea finales)
             writer.write(pretty);
             writer.flush();
         } catch (IOException ex) {
             throw new UncheckedIOException("Error leyendo fuente", ex);
         } catch (RuntimeException ex) {
-            // Si es error léxico o sintáctico, lo propagamos claramente
             if (ScriptSupport.isSyntaxException(ex)) {
                 throw new IllegalStateException("Error de sintaxis al formatear: " + ex.getMessage(), ex);
             }

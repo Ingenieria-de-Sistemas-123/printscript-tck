@@ -1,73 +1,71 @@
+// java
 package implementation;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.printscript.formatter.config.ConfigJsonReader;
 import org.printscript.formatter.config.FormatterConfig;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 final class FormatterConfigLoader {
     private FormatterConfigLoader() {}
 
-    // Detecta "clave": (sólo las claves de objeto JSON, no valores) y las normaliza a camelCase
-    private static final Pattern JSON_KEY_PATTERN =
-            Pattern.compile("\"([A-Za-z][A-Za-z0-9_\\-]*)\"\\s*:");
+    // Defaults coherentes con los golden de los tests
+    private static final Map<String, String> DEFAULTS = Map.of(
+            "mandatory-single-space-separation", "false",
+            "enforce-spacing-before-colon-in-declaration", "false",
+            "enforce-spacing-after-colon-in-declaration", "false",
+            "enforce-no-spacing-around-equals", "false",
+            "mandatory-line-break-after-statement", "true",
+            "line-breaks-after-println", "1",
+            "if-brace-same-line", "true",
+            "if-brace-below-line", "false",
+            "indent-inside-if", "2"
+    );
 
     static FormatterConfig load(InputStream config) {
-        if (config == null) {
-            return new FormatterConfig();
-        }
         try {
-            String content = ScriptSupport.readAll(config);
-            if (content.isBlank()) {
-                return new FormatterConfig();
-            }
+            String userJson = (config == null) ? "" : ScriptSupport.readAll(config).trim();
+            Map<String, String> userFlat = userJson.isBlank() ? Map.of() : parseSimpleFlatJson(userJson);
 
-            // Normalizar claves de configuración del TCK a camelCase esperado por la librería
-            String normalized = normalizeJsonKeysToCamelCase(content);
+            Map<String, String> merged = new LinkedHashMap<>(DEFAULTS);
+            merged.putAll(userFlat);
 
-            Path tempFile = Files.createTempFile("printscript-formatter", ".json");
-            try {
-                Files.writeString(tempFile, normalized, StandardCharsets.UTF_8);
-                return new ConfigJsonReader().readFromFile(tempFile.toString());
-            } finally {
-                Files.deleteIfExists(tempFile);
-            }
+            String mergedJson = toJson(merged);
+            return new ConfigJsonReader().read(mergedJson);
         } catch (IOException ex) {
             throw new UncheckedIOException("Failed to load formatter config", ex);
         }
     }
 
-    private static String normalizeJsonKeysToCamelCase(String json) {
-        Matcher m = JSON_KEY_PATTERN.matcher(json);
-        StringBuffer sb = new StringBuffer();
+    // Parser mínimo para JSON plano: "key": value (boolean/int)
+    private static final Pattern ENTRY = Pattern.compile("\\\"([^\\\"]+)\\\"\\s*:\\s*(true|false|[0-9]+)");
+
+    private static Map<String, String> parseSimpleFlatJson(String content) {
+        Map<String, String> map = new LinkedHashMap<>();
+        Matcher m = ENTRY.matcher(content);
         while (m.find()) {
-            String rawKey = m.group(1); // puede venir en kebab-case o snake_case
-            String camel = toCamelCase(rawKey);
-            // Reemplaza por la clave en camelCase preservando el ":" y el espacio posterior
-            m.appendReplacement(sb, "\"" + camel + "\":");
+            String key = m.group(1);
+            String val = m.group(2);
+            map.put(key, val);
         }
-        m.appendTail(sb);
-        return sb.toString();
+        return map;
     }
 
-    private static String toCamelCase(String key) {
-        // Convierte kebab/snake a camelCase: e.g. mandatory-single-space-separation -> mandatorySingleSpaceSeparation
-        String[] parts = key.split("[-_]");
-        if (parts.length == 0) return key;
-        StringBuilder out = new StringBuilder(parts[0]);
-        for (int i = 1; i < parts.length; i++) {
-            String p = parts[i];
-            if (p.isEmpty()) continue;
-            out.append(Character.toUpperCase(p.charAt(0)));
-            if (p.length() > 1) out.append(p.substring(1));
+    private static String toJson(Map<String, String> flat) {
+        StringBuilder sb = new StringBuilder("{");
+        boolean first = true;
+        for (Map.Entry<String, String> e : flat.entrySet()) {
+            if (!first) sb.append(",");
+            first = false;
+            sb.append("\"").append(e.getKey()).append("\": ").append(e.getValue());
         }
-        return out.toString();
+        sb.append("}");
+        return sb.toString();
     }
 }
