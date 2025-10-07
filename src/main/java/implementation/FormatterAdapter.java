@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Adapter para el TCK: parsea el código según la versión (soporta 1.0 y 1.1),
+ * Adapter que parsea el código según la versión (soporta 1.0 y 1.1),
  * carga configuración JSON y delega en CodeFormatter.
  */
 public final class FormatterAdapter implements PrintScriptFormatter {
