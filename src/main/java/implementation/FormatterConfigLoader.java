@@ -36,7 +36,7 @@ final class FormatterConfigLoader {
         }
     }
 
-    // Parser mínimo para JSON plano: "key": value (boolean/int)
+    //parser minimum para JSON plano: "key": value (boolean/int)
     private static final Pattern ENTRY = Pattern.compile("\\\"([^\\\"]+)\\\"\\s*:\\s*(true|false|[0-9]+)");
 
     private static Map<String, String> parseSimpleFlatJson(String content) {
