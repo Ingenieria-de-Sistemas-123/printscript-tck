@@ -21,7 +21,7 @@ jobs:
       - name: Gradle Clean
         run: ./gradlew clean
       - name: Build with Gradle
-        run: ./gradlew build -Pgpr.user=$GPR_USER -Pgpr.key=$GPR_KEY
+        run: ./gradlew build
         env:
           GPR_USER: ${{ secrets.GPR_USER }}
           GPR_KEY: ${{ secrets.GPR_KEY }}
