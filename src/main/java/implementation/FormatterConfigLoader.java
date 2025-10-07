@@ -15,17 +15,11 @@ import java.util.regex.Pattern;
 final class FormatterConfigLoader {
     private FormatterConfigLoader() {}
 
-    // Defaults coherentes con los golden de los tests
+    // Defaults q coinciden con los golden de los tests
     private static final Map<String, String> DEFAULTS = Map.of(
-            "mandatory-single-space-separation", "false",
-            "enforce-spacing-before-colon-in-declaration", "false",
-            "enforce-spacing-after-colon-in-declaration", "false",
-            "enforce-no-spacing-around-equals", "false",
             "mandatory-line-break-after-statement", "true",
-            "line-breaks-after-println", "1",
-            "if-brace-same-line", "true",
-            "if-brace-below-line", "false",
-            "indent-inside-if", "2"
+            "indent-inside-if", "2",
+            "indent-inside-while", "2"
     );
 
     static FormatterConfig load(InputStream config) {
