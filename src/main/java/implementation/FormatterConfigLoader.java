@@ -18,8 +18,7 @@ final class FormatterConfigLoader {
     // Defaults q coinciden con los golden de los tests
     private static final Map<String, String> DEFAULTS = Map.of(
             "mandatory-line-break-after-statement", "true",
-            "indent-inside-if", "2",
-            "indent-inside-while", "2"
+            "indent-inside-if", "2"
     );
 
     static FormatterConfig load(InputStream config) {
